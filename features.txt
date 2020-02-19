@@ -1,0 +1,29 @@
+
+Feature Plans for Windbrush Concept
+[Updated: 2/19/20]
+
+- UI components open on click or hover, and optionally stay open
+  if locked. Goal of 2 clicks maximum for any available action.
+- HSV/HSB color selector with optional numeric input.
+- Easy to use animation interface where frames can be dragged
+  and dropped around.
+- Drawing tablet support, with auto-eraser detection.
+- Consistent and optional pixel grid.
+- Zoomed pixel editing mode for either the entire work area,
+  or through a selected area using a zoom lens.
+- Pre-selected zoom presets for fast cycling between desired
+  zoom amounts using the mouse wheel or equivalent.
+- Optional auto-detection of handedness, adjusting UI for
+  right/left handedness.
+- Animation preview showing current frame regular sized, previous
+  2 frames scaled above, and next 2 frames scaled below.
+- Dynamic floating color palette allowing colors to be added to
+  either side, in any desired shape, grouped by the artist.
+- Pixel extruder tool to "raise" selected pixels.
+- Silhouette preview mode.
+- Guided pixel tool which attempts to draw clean lines based on
+  the current pixel position. May also use direction prediction.
+- Image offsetting to edit seamless tiles, etc.
+- Clicking and dragging moves the color palette. But clicking and
+  releasing selects a new color.
+- Isometric pixel grid.
