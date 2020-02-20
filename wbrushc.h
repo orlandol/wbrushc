@@ -3,7 +3,10 @@
 
   #include <stddef.h>
 
-  extern int argc;
-  extern wchar_t** argvw;
+/*
+ * Abstracted system function prototypes
+ */
+  extern void sysFreeResources();
+  extern void sysExit( int exitCode );
 
 #endif
