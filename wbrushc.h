@@ -1,7 +1,9 @@
 #ifndef H_WBRUSHC
 #define H_WBRUSHC
 
-  #include <stddef.h>
+#include <stddef.h>
+#include <stdbool.h>
+#include <string.h>
 
 /*
  * Abstracted system function prototypes
