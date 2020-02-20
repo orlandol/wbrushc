@@ -8,5 +8,6 @@
  */
   extern void sysFreeResources();
   extern void sysExit( int exitCode );
+  extern bool sysInitialize( wchar_t* title, unsigned width, unsigned height );
 
 #endif
