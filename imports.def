@@ -1,0 +1,9 @@
+LIBRARY shell32.dll
+
+EXPORTS
+CommandLineToArgvW
+
+LIBRARY user32.dll
+
+EXPORTS
+MessageBoxW

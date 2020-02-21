@@ -6,6 +6,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <string.h>
+#include <math.h>
 
 #include "wintab.h"
  #define PACKETDATA (PK_X | PK_Y | PK_BUTTONS | PK_NORMAL_PRESSURE)
