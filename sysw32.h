@@ -1,6 +1,8 @@
 #ifndef H_SYSW32
 #define H_SYSW32
 
+#define UNICODE
+#define _UNICODE
 #include "windows.h"
 
 #include <stddef.h>

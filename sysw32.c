@@ -1,4 +1,6 @@
 
+#define UNICODE
+#define _UNICODE
 #include "windows.h"
 #include "shellapi.h"
 
@@ -17,168 +19,6 @@
 
   int sysArgc = 0;
   wchar_t** sysArgvw = NULL;
-
-/*
- *  ======================
- *  Win32 helper functions
- *  ======================
- */
-
-/*
- *  bool GetDefaultScreenResolution( unsigned* width, unsigned* height,
- *    unsigned* bpp )
- *
- *  Returns the screen resolution of the default/primary Desktop.
- */
-  bool GetDefaultScreenResolution( unsigned* width, unsigned* height,
-      unsigned* bpp )
-  {
-    MONITORINFO monitorInfo;
-    POINT zeroXY;
-    HMONITOR    defaultMonitor;
-    HDC screenDC;
-    unsigned calculatedWidth;
-    unsigned calculatedHeight;
-    unsigned calculatedBPP;
-
-    // Check Width and Height to determine Windowed/Fullscreen Mode
-    ZeroMemory( &zeroXY, sizeof(zeroXY) );
-    defaultMonitor =
-        MonitorFromPoint(zeroXY, MONITOR_DEFAULTTOPRIMARY);
-
-    // Attempt to get monitor data
-    ZeroMemory( &monitorInfo, sizeof(monitorInfo) );
-    monitorInfo.cbSize = sizeof(monitorInfo);
-    if( GetMonitorInfo(defaultMonitor, &monitorInfo) == 0 )
-    {
-      return false;
-    }
-    if( width )
-    {
-      calculatedWidth  = abs(monitorInfo.rcMonitor.right
-          - monitorInfo.rcMonitor.left);
-      *width = calculatedWidth;
-    }
-
-    if( height )
-    {
-      calculatedHeight = abs(monitorInfo.rcMonitor.bottom
-          - monitorInfo.rcMonitor.top);
-      *height = calculatedHeight;
-    }
-
-    if( bpp )
-    {
-      ///TODO: Get Desktop BPP The Correct Way (TM)
-      ///TODO: Distinguish between 15/16-BPP
-      screenDC = GetDC(0);
-      if( screenDC )
-      {
-        calculatedBPP = GetDeviceCaps(screenDC, PLANES)
-            * GetDeviceCaps(screenDC, BITSPIXEL);
-        *bpp = calculatedBPP;
-        ReleaseDC(0, screenDC);
-      }
-    }
-
-    return true;
-  }
-
-/*
- *  bool GetDefaultDesktopResolution( unsigned* width, unsigned* height,
- *    unsigned* bpp )
- *
- *  Returns the desktop resolution of the default/primary Desktop.
- *    Excludes the taskbar area.
- */
-  bool GetDefaultDesktopResolution( unsigned* width, unsigned* height,
-      unsigned* bpp )
-  {
-    MONITORINFO monitorInfo;
-    POINT zeroXY;
-    HMONITOR defaultMonitor;
-    HDC screenDC;
-    unsigned calculatedWidth;
-    unsigned calculatedHeight;
-    unsigned calculatedBPP;
-
-    ///TODO: Factor in the taskbar
-
-    // Check Width and Height to determine Windowed/Fullscreen Mode
-    ZeroMemory( &zeroXY, sizeof(zeroXY) );
-    defaultMonitor =
-        MonitorFromPoint(zeroXY, MONITOR_DEFAULTTOPRIMARY);
-
-    // Attempt to get monitor data
-    ZeroMemory( &monitorInfo, sizeof(monitorInfo) );
-    monitorInfo.cbSize = sizeof(monitorInfo);
-    if( GetMonitorInfo(defaultMonitor, &monitorInfo) == 0 )
-    {
-      return false;
-    }
-    if( width )
-    {
-      calculatedWidth  = abs(monitorInfo.rcMonitor.right
-          - monitorInfo.rcMonitor.left);
-      *width = calculatedWidth;
-    }
-
-    if( height )
-    {
-      calculatedHeight = abs(monitorInfo.rcMonitor.bottom
-          - monitorInfo.rcMonitor.top);
-      *height = calculatedHeight;
-    }
-
-    if( bpp )
-    {
-      ///TODO: Get Desktop BPP The Correct Way (TM)
-      ///TODO: Distinguish between 15/16-BPP
-      screenDC = GetDC(0);
-      if( screenDC )
-      {
-        calculatedBPP = GetDeviceCaps(screenDC, PLANES)
-            * GetDeviceCaps(screenDC, BITSPIXEL);
-        *bpp = calculatedBPP;
-        ReleaseDC(0, screenDC);
-      }
-    }
-
-    return true;
-  }
-
-/*
- *  void CenterWindowToDesktop( HWND p_wnd )
- *
- *  Center specified window to Desktop.
- */
-  void CenterWindowToDesktop( HWND p_wnd )
-  {
-    RECT windowRect;
-    int windowWidth;
-    int windowHeight;
-    unsigned desktopWidth = 0;
-    unsigned desktopHeight = 0;
-    int centeredX;
-    int centeredY;
-
-    if( p_wnd )
-    {
-      GetDefaultDesktopResolution(
-          &desktopWidth, &desktopHeight, NULL );
-
-      GetWindowRect( p_wnd, &windowRect );
-      windowWidth = (windowRect.right - windowRect.left);
-      windowHeight = (windowRect.bottom - windowRect.top);
-
-      centeredX = (desktopWidth - windowWidth) / 2;
-      centeredY = (desktopHeight - windowHeight) / 2;
-
-      SetWindowPos( p_wnd, 0, centeredX, centeredY,
-        windowWidth, windowHeight,
-        SWP_NOZORDER | SWP_NOACTIVATE );
-    }
-  }
 
 /*
  *  =======================================
@@ -257,37 +97,18 @@
   }
 
 /*
- *  bool sysInitialize( wchar_t* title, unsigned width, unsigned height )
+ *  bool sysInitialize( wchar_t* title )
  *
  *  Implements Win32 app window creation.
  */
 
-  bool sysInitialize( wchar_t* title, unsigned width, unsigned height ) {
+  bool sysInitialize( wchar_t* title ) {
     WNDCLASSEXW windowClassEx;
-    RECT adjustedRect;
-    DWORD windowStyle = WS_OVERLAPPEDWINDOW
-        & (~(WS_THICKFRAME | WS_MAXIMIZEBOX));
+    DWORD windowStyle = WS_OVERLAPPEDWINDOW;
     DWORD windowStyleEx = WS_EX_ACCEPTFILES;
-    unsigned resultingWidth  = 0;
-    unsigned resultingHeight = 0;
-    unsigned desktopWidth = 0;
-    unsigned desktopHeight = 0;
 
     if( sysw32AppWindow ) {
       return false;
-    }
-
-    // Determine resulting width/height from requested/desktop if 0
-    GetDefaultDesktopResolution( &desktopWidth, &desktopHeight, NULL );
-
-    resultingWidth = desktopWidth;
-    if( width ) {
-      resultingWidth = width;
-    }
-
-    resultingHeight = desktopHeight;
-    if( height ) {
-      resultingHeight = height;
     }
 
     // Register window class
@@ -298,7 +119,7 @@
     windowClassEx.hInstance   = sysw32Instance;
     windowClassEx.hIcon       = LoadIcon(0, IDI_APPLICATION);
     windowClassEx.hCursor     = LoadCursor(0, IDC_ARROW);
-    windowClassEx.lpszClassName = L"AppClass";
+    windowClassEx.lpszClassName = L"WBCWindow";
     windowClassEx.hIconSm     = LoadIcon(0, IDI_APPLICATION);
     if( RegisterClassExW(&windowClassEx) == 0 )
     {
@@ -306,32 +127,47 @@
     }
 
     // Create window
-    SetRectEmpty( &adjustedRect );
-    adjustedRect.right = resultingWidth;
-    adjustedRect.bottom = resultingHeight;
-    AdjustWindowRectEx( &adjustedRect, WS_OVERLAPPEDWINDOW,
-        FALSE, 0 );
-
     sysw32AppWindow = CreateWindowExW(
       windowStyleEx,
-      L"AppClass", title,
+      L"WBCWindow", title,
       windowStyle,
       CW_USEDEFAULT, CW_USEDEFAULT,
-      (adjustedRect.right - adjustedRect.left),
-      (adjustedRect.bottom - adjustedRect.top),
+      CW_USEDEFAULT, CW_USEDEFAULT,
       NULL, NULL, sysw32Instance, NULL );
     if( sysw32AppWindow == NULL )
     {
       goto ReturnError;
     }
 
-    CenterWindowToDesktop( sysw32AppWindow );
-
     ShowWindow( sysw32AppWindow, sysw32CmdShow );
     UpdateWindow( sysw32AppWindow );
     return true;
 
   ReturnError:
+    return false;
+  }
+
+/*
+ *  bool sysIsRunning()
+ *
+ *  Implements Win32 message routing on a per message basis,
+ *    intended to be used as the main loop's condition test.
+ */
+  bool sysIsRunning() {
+    MSG currentMessage;
+
+    if( sysw32AppWindow )
+    {
+      ZeroMemory( &currentMessage, sizeof(currentMessage) );
+      if( PeekMessage(&currentMessage, 0, 0, 0, PM_REMOVE) )
+      {
+        TranslateMessage( &currentMessage );
+        DispatchMessage( &currentMessage );
+      }
+
+      return (currentMessage.message != WM_QUIT);
+    }
+
     return false;
   }
 
