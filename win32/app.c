@@ -4,50 +4,51 @@
 #include "windows.h"
 #include "shellapi.h"
 
-#include "sysw32.h"
+#include <stddef.h>
+#include <stdbool.h>
+#include <string.h>
+#include <math.h>
+
+#include "app.h"
 
 /*
- *  =================================
- *  Win32 implementation declarations
- *  =================================
+ *  Internal app declarations
  */
-  HINSTANCE sysw32Instance = NULL;
-  HINSTANCE sysw32PrevInstance = NULL;
-  int sysw32CmdShow = SW_SHOWNORMAL;
+  HINSTANCE appInstance = NULL;
+  HINSTANCE appPrevInstance = NULL;
+  int appCmdShow = SW_SHOWNORMAL;
 
-  HWND sysw32AppWindow = NULL;
+  HWND appWindow = NULL;
 
-  int sysArgc = 0;
-  wchar_t** sysArgvw = NULL;
-
-/*
- *  =======================================
- *  Abstract system function implementation
- *  =======================================
- */
+  int appArgc = 0;
+  wchar_t** appArgvw = NULL;
 
 /*
- *  void sysFreeResources()
+ *  void appFreeResources()
  *
- *  Implements Win32 system resource release function to release
- *    system resources allocated by sysw32.
+ *  Release system resources allocated by app.
  *
  */
-  void sysFreeResources() {
-    if( sysArgvw ) {
-      LocalFree( sysArgvw );
-      sysArgvw = NULL;
+  void appFreeResources() {
+    if( appWindow ) {
+      DestroyWindow( appWindow );
+      appWindow = NULL;
+    }
+
+    if( appArgvw ) {
+      LocalFree( appArgvw );
+      appArgvw = NULL;
     }
   }
 
 /*
- *  void sysExit( int exitCode )
+ *  void appExit( int exitCode )
  *
- *  Implements Win32 system exit function using best practices.
+ *  Exit app function using best practices.
  */
 #include <stdlib.h> // Temporary
-  void sysExit( int exitCode ) {
-    sysFreeResources();
+  void appExit( int exitCode ) {
+    appFreeResources();
     exit(exitCode); // Temporary
   }
 
@@ -55,9 +56,9 @@
  *  LRESULT CALLBACK AppWndProc( HWND windowHandle, UINT message,
  *    WPARAM wParam, LPARAM lParam )
  *
- *  Win32 application window callback.
+ *  Win32 app window callback.
  */
-  LRESULT CALLBACK sysw32WndProc( HWND windowHandle, UINT message,
+  LRESULT CALLBACK appWndProc( HWND windowHandle, UINT message,
       WPARAM wParam, LPARAM lParam )
   {
   	HDC paintDC;
@@ -88,26 +89,26 @@
   }
 
 /*
- *  void sysMessage( wchar_t* errorText )
+ *  void appMessage( wchar_t* errorText )
  *
- *  Implements Win32 message pop-up
+ *  Abstracted Win32 message pop-up
  */
-  void sysMessage( wchar_t* messageText ) {
-    MessageBoxW( sysw32AppWindow, messageText, L"Info", MB_OK );
+  void appMessage( wchar_t* messageText ) {
+    MessageBoxW( appWindow, messageText, L"Info", MB_OK );
   }
 
 /*
- *  bool sysInitialize( wchar_t* title )
+ *  bool appInitialize( wchar_t* title )
  *
- *  Implements Win32 app window creation.
+ *  Abstracted Win32 app window creation.
  */
 
-  bool sysInitialize( wchar_t* title ) {
+  bool appInitialize( wchar_t* title ) {
     WNDCLASSEXW windowClassEx;
     DWORD windowStyle = WS_OVERLAPPEDWINDOW;
     DWORD windowStyleEx = WS_EX_ACCEPTFILES;
 
-    if( sysw32AppWindow ) {
+    if( appWindow ) {
       return false;
     }
 
@@ -115,8 +116,8 @@
     ZeroMemory( &windowClassEx, sizeof(windowClassEx) );
     windowClassEx.cbSize      = sizeof(windowClassEx);
     windowClassEx.style       = CS_HREDRAW | CS_VREDRAW;
-    windowClassEx.lpfnWndProc = sysw32WndProc;
-    windowClassEx.hInstance   = sysw32Instance;
+    windowClassEx.lpfnWndProc = appWndProc;
+    windowClassEx.hInstance   = appInstance;
     windowClassEx.hIcon       = LoadIcon(0, IDI_APPLICATION);
     windowClassEx.hCursor     = LoadCursor(0, IDC_ARROW);
     windowClassEx.lpszClassName = L"WBCWindow";
@@ -127,20 +128,20 @@
     }
 
     // Create window
-    sysw32AppWindow = CreateWindowExW(
+    appWindow = CreateWindowExW(
       windowStyleEx,
       L"WBCWindow", title,
       windowStyle,
       CW_USEDEFAULT, CW_USEDEFAULT,
       CW_USEDEFAULT, CW_USEDEFAULT,
-      NULL, NULL, sysw32Instance, NULL );
-    if( sysw32AppWindow == NULL )
+      NULL, NULL, appInstance, NULL );
+    if( appWindow == NULL )
     {
       goto ReturnError;
     }
 
-    ShowWindow( sysw32AppWindow, sysw32CmdShow );
-    UpdateWindow( sysw32AppWindow );
+    ShowWindow( appWindow, appCmdShow );
+    UpdateWindow( appWindow );
     return true;
 
   ReturnError:
@@ -148,15 +149,15 @@
   }
 
 /*
- *  bool sysIsRunning()
+ *  bool appIsRunning()
  *
- *  Implements Win32 message routing on a per message basis,
- *    intended to be used as the main loop's condition test.
+ *  Abstracted single Win32 message routing function for the
+ *    main loop's condition test.
  */
-  bool sysIsRunning() {
+  bool appIsRunning() {
     MSG currentMessage;
 
-    if( sysw32AppWindow )
+    if( appWindow )
     {
       ZeroMemory( &currentMessage, sizeof(currentMessage) );
       if( PeekMessage(&currentMessage, 0, 0, 0, PM_REMOVE) )
@@ -170,12 +171,6 @@
 
     return false;
   }
-
-/*
- *  ==================================
- *  Win32 main function implementation
- *  ==================================
- */
 
 /*
  *  Abstracted main function wrapper
@@ -192,15 +187,15 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
     PWSTR pCmdLine, int nCmdShow ) {
   int retCode;
 
-  sysw32Instance = hInstance;
-  sysw32PrevInstance = hPrevInstance;
-  sysw32CmdShow = nCmdShow;
+  appInstance = hInstance;
+  appPrevInstance = hPrevInstance;
+  appCmdShow = nCmdShow;
 
-  sysArgvw = CommandLineToArgvW(pCmdLine, &sysArgc);
+  appArgvw = CommandLineToArgvW(pCmdLine, &appArgc);
 
-  retCode = Main(sysArgc, sysArgvw);
+  retCode = Main(appArgc, appArgvw);
 
-  sysFreeResources();
+  appFreeResources();
 
   return retCode;
 }

@@ -5,15 +5,9 @@
 #include <stdbool.h>
 #include <string.h>
 
-/*
- * Abstracted system function prototypes
- */
-  extern void sysMessage( wchar_t* messageText );
-
-  extern void sysFreeResources();
-  extern void sysExit( int exitCode );
-  extern bool sysInitialize();
-
-  extern bool sysIsRunning();
+#include "app.h"
+#include "canvas.h"
+#include "ui.h"
+#include "tablet.h"
 
 #endif

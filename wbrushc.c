@@ -2,12 +2,12 @@
 #include "wbrushc.h"
 
 int Main( int argc, wchar_t* argvw[] ) {
-  if( sysInitialize(L"Windbrush Concept") == false ) {
-    sysMessage( L"Inititalization error" );
-    sysExit(1);
+  if( appInitialize(L"Windbrush Concept") == false ) {
+    appMessage( L"Inititalization error" );
+    appExit(1);
   }
 
-  while( sysIsRunning() ) {
+  while( appIsRunning() ) {
   }
 
   return 0;
