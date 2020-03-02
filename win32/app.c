@@ -24,35 +24,6 @@
   wchar_t** appArgvw = NULL;
 
 /*
- *  void appFreeResources()
- *
- *  Release system resources allocated by app.
- *
- */
-  void appFreeResources() {
-    if( appWindow ) {
-      DestroyWindow( appWindow );
-      appWindow = NULL;
-    }
-
-    if( appArgvw ) {
-      LocalFree( appArgvw );
-      appArgvw = NULL;
-    }
-  }
-
-/*
- *  void appExit( int exitCode )
- *
- *  Exit app function using best practices.
- */
-#include <stdlib.h> // Temporary
-  void appExit( int exitCode ) {
-    appFreeResources();
-    exit(exitCode); // Temporary
-  }
-
-/*
  *  LRESULT CALLBACK AppWndProc( HWND windowHandle, UINT message,
  *    WPARAM wParam, LPARAM lParam )
  *
@@ -86,6 +57,35 @@
     }
 
     return 0;
+  }
+
+/*
+ *  void appFreeResources()
+ *
+ *  Release system resources allocated by app.
+ *
+ */
+  void appFreeResources() {
+    if( appWindow ) {
+      DestroyWindow( appWindow ); // Temporary
+      appWindow = NULL;
+    }
+
+    if( appArgvw ) {
+      LocalFree( appArgvw );
+      appArgvw = NULL;
+    }
+  }
+
+/*
+ *  void appExit( int exitCode )
+ *
+ *  Exit app function using best practices.
+ */
+#include <stdlib.h> // Temporary
+  void appExit( int exitCode ) {
+    appFreeResources();
+    exit(exitCode); // Temporary
   }
 
 /*
