@@ -9,13 +9,16 @@
     DIBSECTION dibSect;
   } Win32Canvas;
 
-  Canvas CreateCanvas( unsigned width, unsigned height, unsigned bpp ) {
+  Canvas CreateCanvas( unsigned width, unsigned height ) {
+    return NULL;
+  }
+
+  Canvas ResizeCanvas( Canvas canvas, unsigned width, unsigned height ) {
     return NULL;
   }
 
   void FreeCanvas( Canvas* canvas ) {
   }
-
 
   void* SurfaceFromCanvas( Canvas source, SurfaceInfo* info ) {
     return NULL;

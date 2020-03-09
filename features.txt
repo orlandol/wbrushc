@@ -1,6 +1,6 @@
 
 Feature Plans for Windbrush Concept
-[Updated: 2/19/20]
+[Updated: 2020-03-09]
 
 - UI components open on click or hover, and optionally stay open
   if locked. Goal of 2 clicks maximum for any available action.
@@ -27,3 +27,7 @@ Feature Plans for Windbrush Concept
 - Clicking and dragging moves the color palette. But clicking and
   releasing selects a new color.
 - Isometric pixel grid.
+- Internal: Edit images using the display pixel format. Convert when
+  loading or saving from a different format. If the pixel format is
+  indexed, the floating palette will have an associated color index.
+  The color index will be converted to a pixel when drawing.

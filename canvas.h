@@ -9,7 +9,8 @@
   typedef void* CanvasImpl;
   typedef CanvasImpl Canvas;
 
-  Canvas CreateCanvas( unsigned width, unsigned height, unsigned bpp );
+  Canvas CreateCanvas( unsigned width, unsigned height );
+  Canvas ResizeCanvas( Canvas canvas, unsigned width, unsigned height );
   void FreeCanvas( Canvas* canvas );
 
 /*
