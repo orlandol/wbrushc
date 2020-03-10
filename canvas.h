@@ -11,7 +11,7 @@
 
   Canvas CreateCanvas( unsigned width, unsigned height );
   Canvas ResizeCanvas( Canvas canvas, unsigned width, unsigned height );
-  void FreeCanvas( Canvas* canvas );
+  void FreeCanvas( Canvas* canvasPtr );
 
 /*
  *  Abstract surface definitions

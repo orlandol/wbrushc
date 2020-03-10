@@ -10,6 +10,7 @@
 #include <math.h>
 
 #include "app.h"
+#include "sysw32.h"
 
 /*
  *  Internal app declarations
@@ -22,6 +23,10 @@
 
   int appArgc = 0;
   wchar_t** appArgvw = NULL;
+
+  HANDLE AppWindowHandle() {
+    return appWindow;
+  }
 
 /*
  *  LRESULT CALLBACK AppWndProc( HWND windowHandle, UINT message,
