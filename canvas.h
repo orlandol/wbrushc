@@ -16,19 +16,24 @@
 /*
  *  Abstract surface definitions
  */
+  typedef struct PixelFormat {
+    unsigned rMask;
+    unsigned gMask;
+    unsigned bMask;
+    unsigned aMash;
+
+    unsigned rShift;
+    unsigned gShift;
+    unsigned bShift;
+    unsigned aShift;
+  } PixelFormat;
+
   typedef struct SurfaceInfo {
     unsigned width;
     unsigned height;
     unsigned bpp;
     size_t size;
-    unsigned rShift;
-    unsigned gShift;
-    unsigned bShift;
-    unsigned aShift;
-    unsigned rMask;
-    unsigned gMask;
-    unsigned bMask;
-    unsigned aMash;
+    PixelFormat pixelFormat;
   } SurfaceInfo;
 
   void* SurfaceFromCanvas( Canvas source, SurfaceInfo* info );
