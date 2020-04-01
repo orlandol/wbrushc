@@ -73,6 +73,8 @@
   bool wintabInitialize() {
     wchar_t wacomName[50] = {};
 
+    ///BUG: Wacom tablet is not consistently failing to initialize.
+
     if( wintabDll ) {
       return true;
     }

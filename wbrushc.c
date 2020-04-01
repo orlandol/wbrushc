@@ -11,6 +11,8 @@ int Main( int argc, wchar_t* argvw[] ) {
     appMessage( L"Error initializing tablet" );
   }
 
+  Canvas canvas = CreateCanvas(100, 100);
+
   while( appIsRunning() ) {
   }
 
