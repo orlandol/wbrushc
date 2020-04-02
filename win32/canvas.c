@@ -14,72 +14,6 @@
     DIBSECTION dibSect;
   } Win32Canvas;
 
-  bool CalcPixelFormat16( HWND winHandle, PixelFormat* pixelFormat ) {
-    return false;
-  }
-
-  bool CalcPixelFormat24( HWND winHandle, PixelFormat* pixelFormat ) {
-    return false;
-  }
-
-  bool CalcPixelFormat32( HWND winHandle, PixelFormat* pixelFormat ) {
-    HDC winDC = NULL;
-    HBITMAP winBitmap = NULL;
-    BITMAP bmpInfo = {};
-    bool result = false;
-    wchar_t msgBuffer[2048] = {};
-
-    winDC = GetDC(winHandle);
-    if( winDC == NULL ) {
-      goto OnError;
-    }
-
-    winBitmap = CreateCompatibleBitmap(winDC, 1, 1);
-    if( winBitmap == NULL ) {
-      goto OnError;
-    }
-
-    GetObject( winBitmap, sizeof(BITMAP), &bmpInfo );
-
-    snwprintf( msgBuffer, sizeof(msgBuffer) - 1,
-      L"      bmType: %i\n"
-      L"     bmWidth: %i\n"
-      L"    bmHeight: %i\n"
-      L"bmWidthBytes: %i\n"
-      L"    bmPlanes: %i\n"
-      L" bmBitsPixel: %i\n"
-      L"      bmBits: %p\n",
-      bmpInfo.bmType,
-      bmpInfo.bmWidth,
-      bmpInfo.bmHeight,
-      bmpInfo.bmWidthBytes,
-      bmpInfo.bmPlanes,
-      bmpInfo.bmBitsPixel,
-      bmpInfo.bmBits
-    );
-
-    MessageBox( AppWindowHandle(), msgBuffer, L"CalcPixelFormat32", MB_OK );
-
-    result = true;
-
-  OnError:
-    if( winBitmap ) {
-      DeleteObject( winBitmap );
-    }
-
-    if( winDC ) {
-      ReleaseDC( winHandle, winDC );
-      winDC = NULL;
-    }
-
-    return result;
-  }
-
-  typedef struct BITMAP256 {
-    BITMAP bmp;
-    
-  } BITMAP256;
-
   Canvas CreateCanvas( unsigned width, unsigned height ) {
     Win32Canvas* newCanvas = NULL;
     PixelFormat pixelFormat;
@@ -89,7 +23,6 @@
     int bitsPixel;
     int planes;
     unsigned winBPP;
-    bool result;
 
     newCanvas = calloc(1, sizeof(Win32Canvas));
     if( newCanvas == NULL ) {
@@ -106,26 +39,21 @@
     EndPaint( winDC, &tempPaint );
     winDC = NULL;
 
-    result = false;
     switch( winBPP ) {
     case 8:
       break;
 
     case 15:
     case 16:
-      result = CalcPixelFormat16(appWindow, &pixelFormat);
       break;
 
     case 24:
-      result = CalcPixelFormat24(appWindow, &pixelFormat);
       break;
 
     case 32:
-      result = CalcPixelFormat32(appWindow, &pixelFormat);
       break;
-    }
 
-    if( result == false ) {
+    default:
       goto OnError;
     }
 
