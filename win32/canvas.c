@@ -9,17 +9,36 @@
 #include "canvas.h"
 #include "sysw32.h"
 
+  typedef struct BITMAPINFOFULL {
+    BITMAPINFOHEADER bmiHeader;
+    union {
+      DWORD bmiBitFields[3];
+      RGBQUAD bmiColors[256];
+    };
+  } BITMAPINFOFULL;
+
+  typedef struct BITMAPINFORGB {
+    BITMAPINFOHEADER bmiHeader;
+    DWORD bmiBitFields[3];
+  } BITMAPINFORGB;
+
   typedef struct Win32Canvas {
     HWND appWindow;
-    DIBSECTION dibSect;
+    HBITMAP dibSect;
+    BITMAPINFORGB dibInfo;
+    VOID* dibBits;
+    UINT dibUsage;
   } Win32Canvas;
 
   Canvas CreateCanvas( unsigned width, unsigned height ) {
     Win32Canvas* newCanvas = NULL;
+    HBITMAP dibSect = NULL;
+    BITMAPINFOFULL* dibInfo = NULL;
     PixelFormat pixelFormat;
-    PAINTSTRUCT tempPaint;
     HWND appWindow = NULL;
     HDC winDC = NULL;
+    UINT dibUsage;
+    DWORD lineSize;
     int bitsPixel;
     int planes;
     unsigned winBPP;
@@ -31,39 +50,76 @@
 
     appWindow = AppWindowHandle();
     newCanvas->appWindow = appWindow;
+    if( appWindow == NULL ) {
+      goto OnError;
+    }
 
-    winDC = BeginPaint(appWindow, &tempPaint);
+    winDC = GetDC(appWindow);
     bitsPixel = GetDeviceCaps(winDC, BITSPIXEL);
     planes = GetDeviceCaps(winDC, PLANES);
     winBPP = bitsPixel * planes;
-    EndPaint( winDC, &tempPaint );
-    winDC = NULL;
 
+    dibInfo = &(newCanvas->dibInfo);
+    dibInfo->bmiHeader.biSize = sizeof(BITMAPINFO);
+    dibInfo->bmiHeader.biWidth = width;
+    dibInfo->bmiHeader.biHeight = -height; // Requires BI_RGB/BITFIELDS
+    dibInfo->bmiHeader.biPlanes = 1; // Must be 1
+    dibInfo->bmiHeader.biBitCount = winBPP;
+    dibInfo->bmiHeader.biCompression = BI_RGB; // Default to BI_RGB
+
+    lineSize = (((width * winBPP) + 31) & (~31)) / 8;
+    dibInfo->bmiHeader.biSizeImage = lineSize * height;
+
+    dibUsage = DIB_RGB_COLORS;
     switch( winBPP ) {
     case 8:
-      break;
+      ///TODO: Set up an 8-BPP DIB Section
+      //dibUsage = DIB_PAL_COLORS;
+      //dibInfo->bmiHeader.biClrUsed = 256; //?
+      //break;
+      goto OnError; // Currently unsupported
 
     case 15:
     case 16:
-      break;
+      ///TODO: Set up bmiColors[0..2]? as BI_BITFIELDS?
+      //dibInfo->bmiHeader.biClrUsed = (1 << winBPP); //?
+      //break;
+      goto OnError; // Currently unsupported
 
     case 24:
       break;
 
     case 32:
+      ///TODO: Set up bmiColors[0..2]? as BI_BITFIELDS?
       break;
 
     default:
       goto OnError;
     }
+    newCanvas->dibUsage = dibUsage;
 
-    ///TODO: Set up buffer
+    ///TODO: Perform sanity check on dibInfo fields
+
+    dibSect = CreateDIBSection( winDC, &(newCanvas->dibInfo),
+      dibUsage,
+      &(newCanvas->dibBits), // Pointer to pixels; GdiFlush before write
+      NULL, 0 // No file mapping specified; No offset needed
+    );
+    newCanvas->dibSect = dibSect;
+
+    ReleaseDC( appWindow, winDC );
+    winDC = NULL;
 
     return newCanvas;
 
   OnError:
+    if( dibSect ) {
+      DeleteObject( dibSect );
+      dibSect = NULL;
+    }
+
     if( winDC ) {
-      EndPaint( winDC, &tempPaint );
+      ReleaseDC( appWindow, winDC );
       winDC = NULL;
     }
 
@@ -80,13 +136,16 @@
   }
 
   void FreeCanvas( Canvas* canvasPtr ) {
-    Canvas canvas;
+    Win32Canvas* canvas;
 
     if( canvasPtr ) {
       canvas = *canvasPtr;
 
       if( canvas ) {
-        ///TODO: Release dibSect/etc
+        if( canvas->dibSect ) {
+          DeleteObject( canvas->dibSect );
+          canvas->dibSect = NULL;
+        }
 
         free( *canvasPtr );
         *canvasPtr = NULL;
