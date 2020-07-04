@@ -1,6 +1,6 @@
 
 Feature Plans for Windbrush Concept
-[Updated: 2020-03-09]
+[Updated: 2020-07-04]
 
 - UI components open on click or hover, and optionally stay open
   if locked. Goal of 2 clicks maximum for any available action.
@@ -31,3 +31,13 @@ Feature Plans for Windbrush Concept
   loading or saving from a different format. If the pixel format is
   indexed, the floating palette will have an associated color index.
   The color index will be converted to a pixel when drawing.
+- Internal: All images will be treated as indexed, where each color
+  on the floating palette serves as an index number, and the bit depth
+  determines the maxinum number of colors that the floating palette
+  can index.
+- Internal: Pixel edge tool where the artist chooses the center point,
+  and create a custom chisel which rotates towards the center point.
+  Pressing the mouse button erases pixels under it.
+- Internal: Floating palette behavior - Dragging on mouse/press down
+  moves the palette, until release; Draw tool auto-hides palette when
+  under it.
