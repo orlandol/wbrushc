@@ -20,7 +20,7 @@
     unsigned rMask;
     unsigned gMask;
     unsigned bMask;
-    unsigned aMash;
+    unsigned aMask;
 
     unsigned rShift;
     unsigned gShift;

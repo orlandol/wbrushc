@@ -28,6 +28,7 @@
     BITMAPINFORGB dibInfo;
     VOID* dibBits;
     UINT dibUsage;
+    PixelFormat pixelFormat;
   } Win32Canvas;
 
   Canvas CreateCanvas( unsigned width, unsigned height ) {
@@ -43,16 +44,21 @@
     int planes;
     unsigned winBPP;
 
+    if( !(width && height) ) {
+      goto OnError;
+    }
+
+    appWindow = AppWindowHandle();
+    if( appWindow == NULL ) {
+      goto OnError;
+    }
+
     newCanvas = calloc(1, sizeof(Win32Canvas));
     if( newCanvas == NULL ) {
       goto OnError;
     }
 
-    appWindow = AppWindowHandle();
     newCanvas->appWindow = appWindow;
-    if( appWindow == NULL ) {
-      goto OnError;
-    }
 
     winDC = GetDC(appWindow);
     bitsPixel = GetDeviceCaps(winDC, BITSPIXEL);
@@ -154,5 +160,21 @@
   }
 
   void* SurfaceFromCanvas( Canvas source, SurfaceInfo* info ) {
+    Win32Canvas* w32Canvas = (Win32Canvas*)source;
+    SurfaceInfo translatedInfo = {};
+
+    if( w32Canvas && info ) {
+      if( w32Canvas->dibBits ) {
+        translatedInfo.width = w32Canvas->dibInfo.bmiHeader.biWidth;
+        translatedInfo.height = abs(w32Canvas->dibInfo.bmiHeader.biHeight);
+        translatedInfo.bpp = w32Canvas->dibInfo.bmiHeader.biBitCount;
+        translatedInfo.size = w32Canvas->dibInfo.bmiHeader.biSizeImage;
+        translatedInfo.pixelFormat = w32Canvas->pixelFormat;
+
+        *info = translatedInfo;
+        return w32Canvas->dibBits;
+      }
+    }
+
     return NULL;
   }
