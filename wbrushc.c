@@ -16,7 +16,6 @@ int Main( int argc, wchar_t* argvw[] ) {
   Canvas canvas = CreateCanvas(100, 100);
   SurfaceInfo surfInfo = {};
   uint8_t* surface = (uint8_t*)SurfaceFromCanvas(canvas, &surfInfo);
-
   if( surface ) {
     memset( surface, 0, surfInfo.size );
   }

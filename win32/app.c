@@ -178,6 +178,17 @@
   }
 
 /*
+ *  void appDrawCanvas( Canvas canvas )
+ *
+ *  Draws the contents of canvas to the active display.
+ *    Canvas is drawn starting from the upper-left corner
+ *    of the work area, whose excess is clipped to the
+ *    lower-right corner.
+ */
+  void appDrawCanvas( Canvas canvas ) {
+  }
+
+/*
  *  Abstracted main function wrapper
  */
   extern int Main( int argc, wchar_t* argvw[] );
