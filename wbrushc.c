@@ -1,30 +1,35 @@
 
-#include "wbrushc.h"
+#include "tigr/tigr.h"
+#include "tigr/tigr.c"
 
-#include "canvas.h"
+#define EASYTAB_IMPLEMENTATION
+#include "easytab\easytab.h"
 
-int Main( int argc, wchar_t* argvw[] ) {
-  if( appInitialize(L"Windbrush Concept") == false ) {
-    appMessage( L"Inititalization error" );
-    appExit(1);
-  }
+  typedef struct Theme {
+    TPixel winBack;
+  } Theme;
 
-  if( !tabletInitialize() ) {
-    appMessage( L"Error initializing tablet" );
-  }
+Theme defaultTheme = {};
+Theme* activeTheme = &defaultTheme;
 
-  Canvas canvas = CreateCanvas(100, 100);
-  SurfaceInfo surfInfo = {};
-  uint8_t* surface = (uint8_t*)SurfaceFromCanvas(canvas, &surfInfo);
-  if( surface ) {
-    memset( surface, 0, surfInfo.size );
-  }
+int main(int argc, char *argv[])
+{
+	Tigr *screen = tigrWindow(640, 400, "Windbrush Concept", TIGR_AUTO);
 
-  while( appIsRunning() ) {
-  }
+    if( EasyTab_Load(screen->handle) != EASYTAB_OK ) {
+    }
 
-  tabletFreeResources();
-  appFreeResources();
+    defaultTheme.winBack = tigrRGB(0x80, 0x80, 0x80);
 
-  return 0;
+	while( !tigrClosed(screen) )
+	{
+		tigrClear( screen, activeTheme->winBack );
+		tigrUpdate( screen );
+	}
+
+	tigrFree( screen );
+
+    EasyTab_Unload();
+
+	return 0;
 }
